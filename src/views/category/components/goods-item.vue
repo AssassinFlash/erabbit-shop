@@ -1,6 +1,6 @@
 <template>
   <!-- 单个商品组件 -->
-  <router-link to="/" class="goods-item">
+  <router-link :to="`/product/${goods.id}`" class="goods-item">
     <img v-lazy="goods.picture" alt="" />
     <p class="name ellipsis">{{ goods.name }}</p>
     <p class="desc ellipsis">{{goods.desc}}</p>

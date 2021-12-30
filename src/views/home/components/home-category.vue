@@ -7,7 +7,7 @@
         :class="{active: categoryId === item.id}"
         @mouseenter="categoryId = item.id"
       >
-        <router-link to="/">{{ item.name }}</router-link>
+        <router-link :to="`/category/${item.id}`">{{ item.name }}</router-link>
         <template v-if="item.children">
           <router-link
             v-for="sub in item.children"
@@ -38,7 +38,7 @@
         v-if="currCategory && currCategory.goods && currCategory.goods.length"
       >
         <li v-for="item in currCategory.goods" :key="item.id">
-          <router-link to="/">
+          <router-link :to="`/product/${item.id}`">
             <img :src="item.picture" alt="">
             <div class="info">
               <p class="name ellipsis-2">{{ item.name }}</p>

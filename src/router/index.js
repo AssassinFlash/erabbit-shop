@@ -4,6 +4,7 @@ const Layout = () => import('@/views/Layout')
 const Home = () => import('@/views/home')
 const TopCategory = () => import('@/views/category')
 const SubCategory = () => import('@/views/category/sub')
+const Goods = () => import('@/views/goods')
 const routes = [
   {
     path: '/',
@@ -20,6 +21,10 @@ const routes = [
       {
         path: '/category/sub/:id',
         component: SubCategory
+      },
+      {
+        path: '/product/:id',
+        component: Goods
       }
     ]
   }
@@ -34,7 +39,10 @@ const router = createRouter({
   // return 的是一个对象，{left:number, top:number}
   // 需求：路由切换时滚动到页面顶部
   scrollBehavior () {
-    return { left: 0, top: 0 }
+    return {
+      left: 0,
+      top: 0
+    }
   }
 })
 

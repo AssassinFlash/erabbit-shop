@@ -2,7 +2,7 @@
   <!-- 展示单个商品的组件 -->
   <template v-if="goods.id">
     <div class="goods-item">
-      <router-link to="/" class="image">
+      <router-link :to="`/product/${goods.id}`" class="image">
         <img v-lazy="goods.picture" alt="">
       </router-link>
       <p class="name ellipsis-2">{{ goods.name }}</p>

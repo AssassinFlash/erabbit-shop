@@ -8,9 +8,9 @@
       <template v-slot:right>
         <div class="sub">
           <router-link
-            to="/"
             v-for="sub in cate.children"
             :key="sub.id"
+            :to="`/category/sub/${sub.id}`"
           >
             {{ sub.name }}
           </router-link>
@@ -18,7 +18,7 @@
         <xtx-more/>
       </template>
       <div class="box">
-        <router-link to="/" class="cover">
+        <router-link :to="`/category/${cate.id}`" class="cover">
           <img v-lazy="cate.picture" alt="">
           <strong class="label">
             <span>{{ cate.name }}</span>
