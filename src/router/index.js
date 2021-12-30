@@ -28,7 +28,14 @@ const routes = [
 // vue3   createRouter({})
 const router = createRouter({
   history: createWebHashHistory(),
-  routes
+  routes,
+  // 路由滚动行为：scrollBehavior(to,from,savedPosition){return 期望滚动的位置}
+  // to,from: 路由对象，savedPosition: 当浏览器的前进/后退触发时可用
+  // return 的是一个对象，{left:number, top:number}
+  // 需求：路由切换时滚动到页面顶部
+  scrollBehavior () {
+    return { left: 0, top: 0 }
+  }
 })
 
 export default router

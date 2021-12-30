@@ -75,11 +75,9 @@
 import { findBrand } from '@/api/home'
 import { useStore } from 'vuex'
 import { ref, reactive, computed } from 'vue'
-import XtxSkeleton from '@/components/library/xtx-skeleton'
 
 export default {
   name: 'HomeCategory',
-  components: { XtxSkeleton },
   // 获取 vuex 分类模块的一级分类，然后再拿两个二级分类填充
   // 最后一行分类定义一个品牌数据分类
   setup () {

@@ -19,7 +19,7 @@
       </template>
       <div class="box">
         <router-link to="/" class="cover">
-          <img :src="cate.picture" alt="">
+          <img v-lazy="cate.picture" alt="">
           <strong class="label">
             <span>{{ cate.name }}</span>
             <span>{{ cate.saleInfo }}</span>
@@ -104,6 +104,7 @@ export default {
       img {
         width: 100%;
         height: 100%;
+        object-fit: cover;
       }
 
       .label {

@@ -8,8 +8,8 @@ import store from '@/store'
 import router from '@/router'
 
 // 导出基准地址，原因：有些其他地方不是通过 axios 发请求，也要用上基准地址
-// export const baseURL = 'http://pcapi-xiaotuxian-front-devtest.itheima.net'
-export const baseURL = 'http://pcapi-xiaotuxian-front.itheima.net'
+export const baseURL = 'http://pcapi-xiaotuxian-front-devtest.itheima.net'
+// export const baseURL = 'http://pcapi-xiaotuxian-front.itheima.net'
 const instance = axios.create({
   // axios 的一些配置
   baseURL,
