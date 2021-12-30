@@ -15,7 +15,7 @@
             {{ sub.name }}
           </router-link>
         </div>
-        <xtx-more/>
+        <xtx-more :to="`/category/${cate.id}`"/>
       </template>
       <div class="box">
         <router-link :to="`/category/${cate.id}`" class="cover">
