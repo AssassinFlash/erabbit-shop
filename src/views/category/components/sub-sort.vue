@@ -1,8 +1,9 @@
 <template>
-  <!-- 封装排序组件 -->
+  <!-- 封装排序组件，当点击了排序或者复选框改变后，派发sort-change 传出排序参数，通知父组件更新数据 -->
   <div class="sub-sort">
     <div class="sort">
-      <a href="javascript:;" :class="{ active: sortParams.sortField === null }" @click="changeSort(null)">
+      <a href="javascript:;" :class="{ active: sortParams.sortField === null }"
+         @click="changeSort(null)">
         默认排序
       </a>
       <a
@@ -51,10 +52,10 @@
       </a>
     </div>
     <div class="check">
-      <xtx-checkbox v-model="sortParams.invertory">
+      <xtx-checkbox @change="changeCheck" v-model="sortParams.invertory">
         仅显示有货商品
       </xtx-checkbox>
-      <xtx-checkbox v-model="sortParams.onlyDiscount">
+      <xtx-checkbox @change="changeCheck" v-model="sortParams.onlyDiscount">
         仅显示特惠商品
       </xtx-checkbox>
     </div>
@@ -63,9 +64,10 @@
 
 <script>
 import { reactive } from 'vue'
+
 export default {
   name: 'SubSort',
-  setup () {
+  setup (props, { emit }) {
     // 实现筛选：筛选条件应与后台保持一致
     // inventory: 是否有库存 onlyDiscount: 只显示特惠
     // sortField: 排序字段，取值范围：[publishTime,orderNum,price,evaluateNum]
@@ -93,11 +95,18 @@ export default {
         sortParams.sortField = sortField
         sortParams.sortMethod = null
       }
+      // 派发sort-change事件，通知父组件排序属性发生改变
+      emit('sort-change', sortParams)
+    }
+    // 复选框状态的变化也要通知父组件排序属性发生改变
+    const changeCheck = () => {
+      emit('sort-change', sortParams)
     }
 
     return {
       sortParams,
-      changeSort
+      changeSort,
+      changeCheck
     }
   }
 }

@@ -25,3 +25,14 @@ export const findTopCategory = (id) => {
 export const findSubCategoryFilter = (id) => {
   return request('/category/sub/filter', 'get', { id })
 }
+
+/*
+ * 获取带筛选条件的商品
+ * @param {Object} params
+ * params 包括：categoryId(分类ID)、inventory(是否有库存)、onlyDiscount(只显示特惠)
+ *        brandId(品牌ID)、sortField(排序字段)、sortMethod(排序规则)、page(分页)
+ *        pageSize(每页显示的条数)
+ */
+export const findSubCategoryGoods = (params) => {
+  return request('/category/goods/temporary', 'post', params)
+}

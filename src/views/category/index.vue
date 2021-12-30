@@ -9,24 +9,25 @@
       <!-- 面包屑 -->
       <xtx-bread>
         <xtx-bread-item :to="{ path: '/' }">首页</xtx-bread-item>
-        <transition name="fade-right" mode="out-in" appear v-if="topCategory.name">
+        <transition name="fade-right" mode="out-in" appear
+                    v-if="topCategory.name">
           <xtx-bread-item :key="topCategory.id">
             {{ topCategory.name }}
           </xtx-bread-item>
         </transition>
         <div v-else>
-            <xtx-skeleton width="28px" height="18px" bg="#e4e4e4" animated />
-          </div>
+          <xtx-skeleton width="28px" height="18px" bg="#e4e4e4" animated/>
+        </div>
       </xtx-bread>
       <!-- 轮播图 -->
-      <xtx-carousel :sliders="sliders" autoPlay style="height: 400px" />
+      <xtx-carousel :sliders="sliders" autoPlay style="height: 400px"/>
       <!-- 全部二级分类 -->
       <div class="sub-list">
         <h3>全部分类</h3>
         <ul>
           <li v-for="item in topCategory.children" :key="item.id">
             <a href="javascript:;">
-              <img v-lazy="item.picture" alt="" />
+              <img v-lazy="item.picture" alt=""/>
               <p>{{ item.name }}</p>
             </a>
           </li>
@@ -37,10 +38,10 @@
         <div class="head">
           <h3>- {{ sub.name }} -</h3>
           <p class="tag">品质之选，精心推荐</p>
-          <xtx-more :path="`/category/sub/${sub.id}`" />
+          <xtx-more :path="`/category/sub/${sub.id}`"/>
         </div>
         <div class="body">
-          <goods-item v-for="item in sub.goods" :key="item.id" :goods="item" />
+          <goods-item v-for="item in sub.goods" :key="item.id" :goods="item"/>
         </div>
       </div>
     </div>
@@ -54,6 +55,7 @@ import { findTopCategory } from '@/api/category'
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
 import { ref, computed, watch } from 'vue'
+
 export default {
   name: 'TopCategory',
   components: {

@@ -3,7 +3,7 @@
   <router-link to="/" class="goods-item">
     <img v-lazy="goods.picture" alt="" />
     <p class="name ellipsis">{{ goods.name }}</p>
-    <p class="desc ellipsis">{goods.desc}</p>
+    <p class="desc ellipsis">{{goods.desc}}</p>
     <p class="price">&yen;{{ goods.price }}</p>
   </router-link>
 </template>
@@ -27,7 +27,6 @@ export default {
   display: block;
   width: 220px;
   padding: 20px 30px;
-  margin: 0 10px;
   text-align: center;
   .hoverShadow();
 
