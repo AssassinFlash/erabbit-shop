@@ -5,39 +5,58 @@
       <!-- 面包屑 -->
       <xtx-bread>
         <xtx-bread-item to="/">首页</xtx-bread-item>
-        <xtx-bread-item v-if="goods"
-                        :to="`/category/${goods.categories[1].id}`">
+        <xtx-bread-item
+          v-if="goods"
+          :to="`/category/${goods.categories[1].id}`"
+        >
           {{ goods.categories[1].name }}
         </xtx-bread-item>
         <div v-else>
-          <xtx-skeleton width="30px" height="20px" animated
-                        bg="#e4e4e4"></xtx-skeleton>
+          <xtx-skeleton
+            width="30px"
+            height="20px"
+            animated
+            bg="#e4e4e4"
+          ></xtx-skeleton>
         </div>
-        <xtx-bread-item v-if="goods"
-                        :to="`/category/sub/${goods.categories[0].id}`">
+        <xtx-bread-item
+          v-if="goods"
+          :to="`/category/sub/${goods.categories[0].id}`"
+        >
           {{ goods.categories[0].name }}
         </xtx-bread-item>
         <div v-else>
-          <xtx-skeleton width="30px" height="20px" animated
-                        bg="#e4e4e4"></xtx-skeleton>
+          <xtx-skeleton
+            width="30px"
+            height="20px"
+            animated
+            bg="#e4e4e4"
+          ></xtx-skeleton>
         </div>
         <xtx-bread-item v-if="goods">{{ goods.name }}</xtx-bread-item>
         <div v-else>
-          <xtx-skeleton width="30px" height="20px" animated
-                        bg="#e4e4e4"></xtx-skeleton>
+          <xtx-skeleton
+            width="30px"
+            height="20px"
+            animated
+            bg="#e4e4e4"
+          ></xtx-skeleton>
         </div>
       </xtx-bread>
       <!-- 商品信息 -->
       <div class="goods-info">
         <!-- 图片预览 -->
         <div class="media" v-if="goods">
-          <goods-image :images="goods.mainPictures"/>
+          <goods-image :images="goods.mainPictures" />
+          <goods-sales />
         </div>
         <!-- 商品描述 -->
-        <div class="spec"></div>
+        <div class="spec" v-if="goods">
+          <goods-name :goods="goods" />
+        </div>
       </div>
       <!-- 商品推荐 -->
-      <goods-relevant/>
+      <goods-relevant />
       <!-- 商品详情 -->
       <div class="goods-footer">
         <div class="goods-article">
@@ -55,7 +74,9 @@
 
 <script>
 import GoodsRelevant from './components/goods-relevant'
-import GoodsImage from '@/views/goods/components/goods-image'
+import GoodsImage from './components/goods-image'
+import GoodsSales from './components/goods-sales'
+import GoodsName from './components/goods-name'
 import { findGoods } from '@/api/product'
 import { ref, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
@@ -64,7 +85,9 @@ export default {
   name: 'XtxGoodsPage',
   components: {
     GoodsImage,
-    GoodsRelevant
+    GoodsRelevant,
+    GoodsSales,
+    GoodsName
   },
   setup () {
     // 1.获取商品详情，进行渲染
@@ -73,25 +96,28 @@ export default {
       goods
     }
   }
-
 }
 // 获取商品详情
 // 出现路由ID发生变化，但由于路由规则没变，动态路由不会重新创建组件
 const useGoods = () => {
   const goods = ref(null)
   const route = useRoute()
-  watch(() => route.params.id, (newVal) => {
-    if (newVal && `/product/${newVal}` === route.path) {
-      findGoods(route.params.id).then(data => {
-        // 目的是让v-if判断的组件销毁，重新创建组件
-        // 先让组件销毁，然后再赋值，这要经过一段时间
-        goods.value = null
-        nextTick(() => {
-          goods.value = data.result
+  watch(
+    () => route.params.id,
+    (newVal) => {
+      if (newVal && `/product/${newVal}` === route.path) {
+        findGoods(route.params.id).then((data) => {
+          // 目的是让v-if判断的组件销毁，重新创建组件
+          // 先让组件销毁，然后再赋值，这要经过一段时间
+          goods.value = null
+          nextTick(() => {
+            goods.value = data.result
+          })
         })
-      })
-    }
-  }, { immediate: true })
+      }
+    },
+    { immediate: true }
+  )
   return goods
 }
 </script>

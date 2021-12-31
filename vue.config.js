@@ -10,5 +10,13 @@ module.exports = {
         path.join(__dirname, './src/assets/styles/mixins.less')
       ]
     }
+  },
+  // 对10kb以下图片打包成base64格式的字符串，有效压缩图片数据
+  chainWebpack: (config) => {
+    config.module
+      .rule('images')
+      .use('url-loader')
+      .loader('url-loader')
+      .tap((options) => Object.assign(options, { limit: 10000 }))
   }
 }
