@@ -52,7 +52,10 @@
         </div>
         <!-- 商品描述 -->
         <div class="spec" v-if="goods">
+          <!-- 商品名字 -->
           <goods-name :goods="goods" />
+          <!-- 商品可选属性 -->
+          <goods-sku :goods="goods" />
         </div>
       </div>
       <!-- 商品推荐 -->
@@ -77,6 +80,7 @@ import GoodsRelevant from './components/goods-relevant'
 import GoodsImage from './components/goods-image'
 import GoodsSales from './components/goods-sales'
 import GoodsName from './components/goods-name'
+import GoodsSku from './components/goods-sku'
 import { findGoods } from '@/api/product'
 import { ref, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
@@ -87,7 +91,8 @@ export default {
     GoodsImage,
     GoodsRelevant,
     GoodsSales,
-    GoodsName
+    GoodsName,
+    GoodsSku
   },
   setup () {
     // 1.获取商品详情，进行渲染
