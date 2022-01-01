@@ -1,7 +1,7 @@
 <template>
   <!-- 城市组件 -->
   <div class="xtx-city" ref="target">
-    <div class="select" @click="toggle" :class="{ active: active }">
+    <div class="select" @click="toggleDialog" :class="{ active: active }">
       <span class="placeholder" v-if="fullLocation === ''">请选择配送地址</span>
       <span class="value" v-else>{{ fullLocation }}</span>
       <i class="iconfont icon-angle-down" />
@@ -9,7 +9,12 @@
     <div class="option" v-if="active">
       <div v-if="loading" class="loading"></div>
       <template v-else>
-        <span class="ellipsis" v-for="item in currList" :key="item.code">
+        <span
+          class="ellipsis"
+          v-for="item in currList"
+          :key="item.code"
+          @click="changeItem(item)"
+        >
           {{ item.name }}
         </span>
       </template>
@@ -20,9 +25,9 @@
 <script>
 // 使用 @vueuse/core 提供的 onClickOutside API，表示如果点击了元素外部就执行逻辑
 // 需求：点击组件外部元素关闭选择框
-import { onClickOutside } from '@vueuse/core'
 import axios from 'axios'
-import { ref, computed } from 'vue'
+import { onClickOutside } from '@vueuse/core'
+import { ref, reactive, computed } from 'vue'
 export default {
   name: 'XtxCity',
   props: {
@@ -31,32 +36,30 @@ export default {
       default: ''
     }
   },
-  setup () {
+  setup (props, { emit }) {
     const target = ref(null)
     const loading = ref(false)
 
-    // 控制select组件显示和隐藏
-    const active = ref(false)
-    // 所有地区数据
-    const allCityData = ref([])
-
-    const open = () => {
+    const active = ref(false) // 控制select组件显示和隐藏
+    const cityData = ref([]) // 城市数据
+    const openDialog = () => {
       active.value = true
-      // 获取地区数据
-      loading.value = true
+      for (const key in changeResult) {
+        changeResult[key] = ''
+      }
       getCityData().then((data) => {
-        allCityData.value = data
+        cityData.value = data
         loading.value = false
       })
     }
-    const close = () => {
+    const closeDialog = () => {
       active.value = false
     }
-    const toggle = () => {
-      active.value ? close() : open()
+    const toggleDialog = () => {
+      active.value ? closeDialog() : openDialog()
     }
     onClickOutside(target, () => {
-      close()
+      closeDialog()
     })
 
     // 获取省市区数据
@@ -69,31 +72,72 @@ export default {
         if (window.cityData) {
           resolve(window.cityData)
         } else {
-          axios({
-            url: 'https://yjy-oss-files.oss-cn-zhangjiakou.aliyuncs.com/tuxian/area.json',
-            method: 'get'
-          }).then((data) => {
+          loading.value = true
+          const url = 'https://yjy-oss-files.oss-cn-zhangjiakou.aliyuncs.com/tuxian/area.json'
+          axios.get(url).then(data => {
             window.cityData = data.data
-            resolve(data.data)
+            resolve(window.cityData)
           })
         }
       })
+    }
+
+    // 定义选择的省市区数据，当点击地区选项时记录
+    const changeResult = reactive({
+      provinceCode: '',
+      provinceName: '',
+      cityCode: '',
+      cityName: '',
+      countyCode: '',
+      countyName: '',
+      fullLocation: ''
+    })
+
+    const changeItem = (item) => {
+      // 省
+      if (item.level === 0) {
+        changeResult.provinceCode = item.code
+        changeResult.provinceName = item.name
+      }
+      // 市
+      if (item.level === 1) {
+        changeResult.cityCode = item.code
+        changeResult.cityName = item.name
+      }
+      // 区
+      if (item.level === 2) {
+        changeResult.countyCode = item.code
+        changeResult.countyName = item.name
+        // 最后一层，通知父组件地址已构建完成
+        changeResult.fullLocation = `${changeResult.provinceName} ${changeResult.cityName} ${changeResult.countyName}`
+        emit('change', changeResult)
+        closeDialog()
+      }
     }
 
     // 计算属性：依赖于所有省市区数据，计算出当前显示的地区数组
     // 默认获取省一级数据，点击了某个省，列表就要变化，显示该省的市一级数据
     // 同样，当点击了某个市，列表又要变化，显示该市的地区一级数据
     const currList = computed(() => {
-      const list = allCityData.value
+      // 省
+      let list = cityData.value
+      // 市
+      if (changeResult.provinceCode) {
+        list = list.find(province => province.code === changeResult.provinceCode).areaList
+      }
+      // 区
+      if (changeResult.cityCode) {
+        list = list.find(city => city.code === changeResult.cityCode).areaList
+      }
       return list
     })
 
     return {
       target,
-      loading,
       active,
-      toggle,
-      currList
+      toggleDialog,
+      currList,
+      changeItem
     }
   }
 }

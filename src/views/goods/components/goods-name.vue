@@ -8,7 +8,7 @@
   <div class="g-service">
     <dl>
       <dt>配送</dt>
-      <dd>至 <xtx-city :fullLocation="fullLocation" /></dd>
+      <dd>至 <xtx-city :fullLocation="fullLocation" @change="changeCity" /></dd>
     </dl>
     <dl>
       <dt>服务</dt>
@@ -48,16 +48,22 @@ export default {
 
     if (props.goods.userAddresses) {
       const defaultAddr = props.goods.userAddresses.find(addr => addr.isDefault === 1)
-      if (defaultAddr) {
-        provinceCode.value = defaultAddr.provinceCode
-        cityCode.value = defaultAddr.cityCode
-        countyCode.value = defaultAddr.countyCode
-        fullLocation.value = defaultAddr.fullLocation
-      }
+      provinceCode.value = defaultAddr.provinceCode
+      cityCode.value = defaultAddr.cityCode
+      countyCode.value = defaultAddr.countyCode
+      fullLocation.value = defaultAddr.fullLocation
+    }
+
+    const changeCity = (changeResult) => {
+      provinceCode.value = changeResult.provinceCode
+      cityCode.value = changeResult.cityCode
+      countyCode.value = changeResult.countyCode
+      fullLocation.value = changeResult.fullLocation
     }
 
     return {
-      fullLocation
+      fullLocation,
+      changeCity
     }
   }
 }
