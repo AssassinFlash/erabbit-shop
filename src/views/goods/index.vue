@@ -55,7 +55,7 @@
           <!-- 商品名字 -->
           <goods-name :goods="goods" />
           <!-- 商品可选属性 -->
-          <goods-sku :goods="goods" />
+          <goods-sku :goods="goods" skuId="1369155864430120962" @change="changeSku"/>
         </div>
       </div>
       <!-- 商品推荐 -->
@@ -95,10 +95,20 @@ export default {
     GoodsSku
   },
   setup () {
-    // 1.获取商品详情，进行渲染
+    // 获取商品详情，进行渲染
     const goods = useGoods()
+
+    // 侦听sku组件派发的change事件，拿到传来的sku，更新现有商品的信息
+    const changeSku = (sku) => {
+      if (sku.skuId) {
+        goods.value.price = sku.price
+        goods.value.oldPrice = sku.oldPrice
+        goods.value.inventory = sku.inventory
+      }
+    }
     return {
-      goods
+      goods,
+      changeSku
     }
   }
 }

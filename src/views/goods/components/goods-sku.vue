@@ -86,17 +86,39 @@ const updateDisabledStatus = (specs, pathMap) => {
     const selectedArr = getSelectedArr(specs)
     spec.values.forEach((val) => {
       // 已经选中的按钮就不必判断，因为这个按钮一定是可以使用的
-      if (val.selected) return
+      if (val.name === selectedArr[i]) return false
       // 这一规格下未选中的按钮去套入规格数组
       selectedArr[i] = val.name
       // 过滤无效值得到key
-      const key = selectedArr.filter(value => {
-        if (value) return true
-      }).join(spliter)
+      const key = selectedArr.filter(val => val).join(spliter)
       // key和路径字典匹配
-      val.disabled = !pathMap[key]
+      if (!pathMap[key]) {
+        val.disabled = true
+        val.selected = false
+      } else {
+        val.disabled = false
+      }
     })
   })
+}
+
+// 在进入页面时,根据传入的skuId，要先初始化商品规格的选中状态
+// 参数1：商品规格数组，参数2：商品属性路径ID skuId
+// 1.根据skuId属性路径ID从属性路径数组中找到对应的属性路径
+// 2.根据找到的属性路径，找到属性名，从属性名中找到该属性所属的那一行规格
+// 3.在这一行规格中找到该属性名对应的按钮，设置按钮状态为true
+const initSelectedStatus = (goods, skuId) => {
+  // [{name:'颜色',valueName:'黑色'}]
+  const sku = goods.skus.find(sku => sku.id === skuId)
+  if (sku) {
+    // [{name:'颜色',values:[{name:'黑色'}]}]
+    goods.specs.forEach((spec, i) => {
+      const skuSpecValueName = sku.specs[i].valueName
+      spec.values.forEach(val => {
+        val.selected = val.name === skuSpecValueName
+      })
+    })
+  }
 }
 
 export default {
@@ -107,21 +129,32 @@ export default {
       default () {
         return { specs: [], skus: [] }
       }
+    },
+    skuId: {
+      type: String,
+      default: ''
     }
   },
-  setup (props) {
+  setup (props, { emit }) {
     // 得到路径字典
     const pathMap = getPathMap(props.goods.skus)
     console.log(pathMap)
     // 组件初始化时，更新按钮的禁用状态
     updateDisabledStatus(props.goods.specs, pathMap)
-    // 点击按钮时，更新按钮的禁用状态
+    // 组件初始化时，更新商品规格的选中状态
+    initSelectedStatus(props.goods, props.skuId)
 
+    // 点击按钮时，更新按钮的禁用状态
     // 1.选中与取消选中，约定每个按钮都有自己的选中状态：selected
     // 2.点击的是已选中，只需取消当前已选中，点击的是未选中，把同一规格的按钮改成未选中，当前点击的改成选中
+    // 将选择的sku信息通知父组件{skuId,price,oldPrice,inventory,specsText}
+    // 每点一个按钮都要触发，有两种情况：
+    // 1.选择完整的sku组合按钮，才可拿到这些信息，提交给父组件
+    // 2.不是完整的sku组合按钮，提交空对象给父组件
+    // 这是因为父组件需要判断是否规格选择完整，完整的规格才能加入购物车
     const changeSku = (spec, val) => {
       // 当按钮是被禁用时，不执行选中逻辑
-      if (val.disabled) return
+      if (val.disabled) return false
       if (val.selected) {
         val.selected = false
       } else {
@@ -129,7 +162,33 @@ export default {
           val.selected = false
         })
         val.selected = true
-        updateDisabledStatus(props.goods.specs, pathMap)
+      }
+      updateDisabledStatus(props.goods.specs, pathMap)
+
+      // arr.reduce(callback,[initValue])：reduce 为数组中的每一个元素依次执行回调函数
+      // callback (执行数组中每个值的函数，包含四个参数)：
+      //  1.previousValue：上次调用回调返回的值，或者是提供的初始值
+      //  2.currentValue：数组中当前被处理的数
+      //  3.index：当前元素在数组中的索引
+      //  4.array：调用reduce函数的数组
+      // initValue (作为第一次调用callback的初始值)
+      const validSelectedArr = getSelectedArr(props.goods.specs).filter(value => value)
+      if (validSelectedArr.length === props.goods.specs.length) {
+        // 完整路径
+        const selectedSkuId = pathMap[validSelectedArr.join(spliter)]
+        const sku = props.goods.skus.find(sku => sku.id === selectedSkuId[0])
+        const specsText = sku.specs.reduce((prevVal, curVal) => {
+          return `${prevVal} ${curVal.name}: ${curVal.valueName}`
+        }, '').trim()
+        emit('change', {
+          skuId: sku.id,
+          price: sku.price,
+          oldPrice: sku.oldPrice,
+          inventory: sku.inventory,
+          specsText
+        })
+      } else {
+        emit('change', {})
       }
     }
 
