@@ -3,7 +3,7 @@
   <router-link :to="`/product/${goods.id}`" class="goods-item">
     <img v-lazy="goods.picture" alt="" />
     <p class="name ellipsis">{{ goods.name }}</p>
-    <p class="desc ellipsis">{{goods.desc}}</p>
+    <p class="desc ellipsis">{{ goods.desc }}</p>
     <p class="price">&yen;{{ goods.price }}</p>
   </router-link>
 </template>

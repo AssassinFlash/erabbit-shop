@@ -4,17 +4,30 @@
     @mouseenter="stop"
     @mouseleave="start"
   >
-    <!-- 图片 -->
+    <!-- 图片容器 -->
     <ul class="carousel-body">
+      <!-- 图片 -->
       <li
         class="carousel-item"
         v-for="(item,i) in sliders"
         :key="item.id"
         :class="{fade : index === i}"
       >
-        <router-link to="/">
+        <router-link v-if="item.hrefUrl" :to="item.hrefUrl">
           <img :src="item.imgUrl" alt="">
         </router-link>
+        <!-- 商品列表：item:[goods1,goods2...] -->
+        <div class="slider" v-else>
+          <router-link
+            v-for="goods in item"
+            :key="goods.id"
+            :to="`/product/${goods.id}`"
+          >
+            <img :src="goods.picture" alt="">
+            <p class="name ellipsis">{{ goods.name }}</p>
+            <p class="price">&yen;{{ goods.price }}</p>
+          </router-link>
+        </div>
       </li>
     </ul>
     <!-- 箭头 -->
@@ -213,6 +226,36 @@ export default {
   &:hover {
     .carousel-btn {
       opacity: 1;
+    }
+  }
+
+  // 轮播商品
+  .slider {
+    display: flex;
+    justify-content: space-around;
+    padding: 0 40px;
+
+    > a {
+      width: 240px;
+      text-align: center;
+
+      img {
+        padding: 20px;
+        width: 230px !important;
+        height: 230px !important;
+      }
+
+      .name {
+        padding: 0 40px;
+        font-size: 16px;
+        color: #666;
+      }
+
+      .price {
+        margin-top: 15px;
+        font-size: 16px;
+        color: @priceColor;
+      }
     }
   }
 }
