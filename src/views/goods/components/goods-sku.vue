@@ -202,6 +202,7 @@ export default {
 <style lang="less" scoped>
 .sku-state-mixin() {
   margin-right: 10px;
+  margin-bottom: 10px;
   border: 1px solid #e4e4e4;
   cursor: pointer;
   transition: all 0.2s ease;
