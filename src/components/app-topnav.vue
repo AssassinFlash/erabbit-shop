@@ -17,9 +17,7 @@
         </template>
         <template v-else>
           <li>
-            <a href="javascript:;">
-              请先登录
-            </a>
+            <router-link to="/login">请先登录</router-link>
           </li>
           <li>
             <a href="javascript:;">
