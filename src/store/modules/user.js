@@ -13,13 +13,20 @@ export default {
         account: '',
         mobile: '',
         token: ''
-      }
+      },
+      // 记录下未去QQ登录时login地址栏出现的redirectUrl，方便跳转
+      // 原因是QQ登录返回的来源页地址栏已经丢失，变成callback=xxx
+      redirectUrl: '/'
     }
   },
   mutations: {
     // 修改用户信息 payload 就是用户信息对象
     setUser (state, payload) {
       state.profile = payload
+    },
+    // 修改地址栏
+    setRedirectUrl (state, redirectUrl) {
+      state.redirectUrl = redirectUrl
     }
   }
 }

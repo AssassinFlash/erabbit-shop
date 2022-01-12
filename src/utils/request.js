@@ -18,6 +18,7 @@ const instance = axios.create({
 
 instance.interceptors.request.use(config => {
   // 请求拦截器进行请求配置的修改
+  // 读取用户信息，配置请求带上token
   const { profile } = store.state.user
   if (profile.token) {
     config.headers.Authorization = `Bearer ${profile.token}`

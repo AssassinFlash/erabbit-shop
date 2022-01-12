@@ -10,7 +10,7 @@
             </a>
           </li>
           <li>
-            <a href="javascript:;">
+            <a @click="logout" href="javascript:;">
               退出登录
             </a>
           </li>
@@ -58,6 +58,7 @@
 
 <script>
 import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
 import { computed } from 'vue'
 
 export default {
@@ -65,12 +66,18 @@ export default {
   setup () {
     // 登录注册链接根据用户信息来控制
     const store = useStore()
-    // 使用 vuex 的 state 要设置计算属性
+    // 使用 vuex 的 state 要设置计算属性，否则不是响应式
     const profile = computed(() => {
       return store.state.user.profile
     })
+    const router = useRouter()
+    const logout = () => {
+      store.commit('user/setUser', {})
+      router.push({ name: 'Login' })
+    }
     return {
-      profile
+      profile,
+      logout
     }
   }
 }

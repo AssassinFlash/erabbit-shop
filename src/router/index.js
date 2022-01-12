@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 
 const Login = () => import('@/views/login')
+const LoginCallback = () => import('@/views/login/callback')
 const Layout = () => import('@/views/Layout')
 const Home = () => import('@/views/home')
 const TopCategory = () => import('@/views/category')
@@ -13,25 +14,35 @@ const routes = [
     children: [
       {
         path: '',
+        name: 'Home',
         component: Home
       },
       {
         path: '/category/:id',
+        name: 'Category',
         component: TopCategory
       },
       {
         path: '/category/sub/:id',
+        name: 'SubCategory',
         component: SubCategory
       },
       {
         path: '/product/:id',
+        name: 'Product',
         component: Goods
       }
     ]
   },
   {
     path: '/login',
+    name: 'Login',
     component: Login
+  },
+  {
+    path: '/login/callback',
+    name: 'LoginCallback',
+    component: LoginCallback
   }
 ]
 // vue2.0 new VueRouter({}) 创建路由实例

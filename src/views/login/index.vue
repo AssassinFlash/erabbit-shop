@@ -36,6 +36,8 @@
 import LoginHeader from './components/login-header'
 import LoginFooter from './components/login-footer'
 import LoginForm from './components/login-form'
+import { useStore } from 'vuex'
+import { useRoute } from 'vue-router'
 import { ref } from 'vue'
 
 export default {
@@ -47,6 +49,15 @@ export default {
   },
   setup () {
     const activeName = ref('account')
+
+    // 进入登录页面就存储从其他页面跳转过来的页面url，方便登录后回跳
+    const store = useStore()
+    const route = useRoute()
+    if (route.query.redirectUrl) {
+      store.commit('user/setRedirectUrl', route.query.redirectUrl)
+    } else {
+      store.commit('user/setRedirectUrl', '/')
+    }
 
     return {
       activeName

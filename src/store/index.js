@@ -13,7 +13,7 @@ export default createStore({
     cart,
     category
   },
-  // 配置 vuex 插件
+  // 配置 vuex 插件，使用本地存储
   plugins: [createPersistedState({
     // 本地存储的名字 key
     key: 'erabbit-shop',
