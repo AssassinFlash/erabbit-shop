@@ -68,6 +68,7 @@
           <xtx-button
             type="primary"
             style="margin-top: 20px; margin-left: 10px"
+            @click="insertCart"
           >
             加入购物车
           </xtx-button>
@@ -103,7 +104,8 @@ import GoodsTabs from './components/goods-tabs'
 import GoodsHot from './components/goods-hot'
 import GoodsWarn from './components/goods-warn'
 import { findGoods } from '@/api/product'
-import { ref, watch, nextTick, provide } from 'vue'
+import { useStore } from 'vuex'
+import { ref, watch, nextTick, provide, getCurrentInstance } from 'vue'
 import { useRoute } from 'vue-router'
 
 export default {
@@ -125,12 +127,45 @@ export default {
     const num = ref(1)
 
     // 侦听sku组件派发的change事件，拿到传来的sku，更新现有商品的信息
+    // 记录传来的sku，可能有值，可能为空，这是因为sku有可能未选择完
+    const currSku = ref(null)
     const changeSku = (sku) => {
       if (sku.skuId) {
         goods.value.price = sku.price
         goods.value.oldPrice = sku.oldPrice
         goods.value.inventory = sku.inventory
+        currSku.value = sku
+      } else {
+        currSku.value = null
       }
+    }
+
+    // 加入购物车
+    const { proxy } = getCurrentInstance()
+    const store = useStore()
+    const insertCart = async () => {
+      if (!currSku.value) {
+        return proxy.$message({ text: '请选择完整的商品规格' })
+      }
+      const { skuId, specsText, inventory, price } = currSku.value
+      const { id, name, mainPictures } = goods.value
+      if (num.value > inventory) {
+        return proxy.$message({ text: '库存不足' })
+      }
+      await store.dispatch('cart/insertCart', {
+        id,
+        name,
+        picture: mainPictures[0],
+        skuId,
+        attrsText: specsText,
+        stock: inventory,
+        price,
+        nowPrice: price,
+        selected: true,
+        isEffective: true,
+        count: num.value
+      })
+      proxy.$message({ type: 'success', text: '加入购物车成功' })
     }
 
     // 提供goods数据给后代组件使用
@@ -139,7 +174,8 @@ export default {
     return {
       goods,
       changeSku,
-      num
+      num,
+      insertCart
     }
   }
 }
