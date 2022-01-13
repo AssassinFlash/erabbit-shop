@@ -143,6 +143,7 @@ export default {
 
   .small {
     width: 80px;
+    overflow: auto;
 
     li {
       width: 68px;
@@ -153,6 +154,11 @@ export default {
 
       &:hover, &.active {
         border: 2px solid @xtxColor;
+      }
+
+      img {
+        width: 68px;
+        height: 68px;
       }
     }
   }

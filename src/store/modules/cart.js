@@ -1,11 +1,31 @@
 // 购物车模块
-
+import { getNewCartGoods } from '@/api/cart'
 export default {
   namespaced: true,
   state () {
     return {
       // 购物车商品列表
       list: []
+    }
+  },
+  // vuex 的计算属性：getters
+  getters: {
+    // 有效商品：库存 > 0 isEffective = true
+    // 有效商品列表
+    validList (state) {
+      return state.list.filter(goods => goods.isEffective && goods.stock > 0)
+    },
+    // 有效商品总件数，getters里定义的函数可以传getters，这样即可直接调用getters
+    validTotal (state, getters) {
+      return getters.validList.reduce((prevVal, currVal) => {
+        return prevVal + currVal.count
+      }, 0)
+    },
+    // 有效商品总金额
+    validAmount (state, getters) {
+      return getters.validList.reduce((prevVal, currVal) => {
+        return prevVal + Number((currVal.nowPrice * currVal.count).toString().match(/^\d+(?:\.\d{0,2})?/))
+      }, 0)
     }
   },
   mutations: {
@@ -27,6 +47,16 @@ export default {
         // 3.如果没有相同商品，插入记录即可
         state.list.unshift(payload)
       }
+    },
+    // 修改购物车商品，payload：商品信息，包含 nowPrice，stock，isEffective，skuId
+    updateCart (state, payload) {
+      // 需要修改的商品信息并不固定，由传过来的payload包含多少字段来决定
+      const updateGoods = state.list.find(goods => goods.skuId === payload.skuId)
+      for (const key in payload) {
+        if (payload[key] !== undefined && payload[key] !== null && payload[key] !== '') {
+          updateGoods[key] = payload[key]
+        }
+      }
     }
   },
   actions: {
@@ -45,6 +75,28 @@ export default {
           resolve()
         }
       })
+    },
+    // 更新购物车中商品信息时就会调用修改购物车的方法
+    findCartList ({ rootState, state, commit }) {
+      // 已登录
+      if (rootState.user.profile.token) {
+
+      } else {
+        // 未登录
+        // 同时发送请求（有几个商品就发几个请求）等所有请求成功，一并修改本地数据
+        // Promise.all(promise数组).then(dataList=>{})，得到的结果数组与promise数组一一对应
+        const promiseArr = state.list.map(goods => {
+          // 返回接口函数的调用，该函数生成一个promise
+          return getNewCartGoods(goods.skuId)
+        })
+        Promise.all(promiseArr).then(dataList => {
+          dataList.forEach((data, i) => {
+            // console.log(data.result)
+            // 返回的result本身没有skuId，而修改购物车商品需要skuId
+            commit('updateCart', { skuId: state.list[i].skuId, ...data.result })
+          })
+        })
+      }
     }
   }
 }

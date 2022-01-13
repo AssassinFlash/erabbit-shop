@@ -37,6 +37,7 @@
 // 4.在组件初始化的时候判断每个规格是否可以点击
 // 5.在点击规格的时候判断其他规格是否可以点击
 // 6.判断依据：如果可走路径在路径字典中，即可点击
+import { useRoute } from 'vue-router'
 import getPowerSet from '@/vender/power-set'
 const spliter = '★'
 const getPathMap = (skus) => {
@@ -142,7 +143,8 @@ export default {
     // 组件初始化时，更新按钮的禁用状态
     updateDisabledStatus(props.goods.specs, pathMap)
     // 组件初始化时，更新商品规格的选中状态
-    initSelectedStatus(props.goods, props.skuId)
+    const route = useRoute()
+    initSelectedStatus(props.goods, route.params.skuId || props.skuId)
 
     // 点击按钮时，更新按钮的禁用状态
     // 1.选中与取消选中，约定每个按钮都有自己的选中状态：selected
