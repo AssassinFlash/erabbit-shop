@@ -9,7 +9,7 @@ export default {
   // 4. h 的第一个参数：标签名字 第二个参数：标签属性，是个对象 第三个参数：子节点
   // 需求：
   // 1.创建 xtx-bread 父容器
-  // 2.获取默认插槽内容
+  // 2.获取默认插槽内容：<router-link>首页</router-link><router-link>购物车</router-link>
   // 3.去除 xtx-bread-item 组件的 i 标签，应该由 render 函数来判断
   // 4.遍历插槽的 item，得到一个动态创建的节点，最后一个 item 不加 i 标签
   // 5.把动态创建的节点渲染到 xtx-bread 标签内

@@ -1,5 +1,6 @@
 // 购物车模块
 import { getNewCartGoods } from '@/api/cart'
+
 export default {
   namespaced: true,
   state () {
@@ -57,6 +58,11 @@ export default {
           updateGoods[key] = payload[key]
         }
       }
+    },
+    // 删除购物车商品
+    deleteCart (state, skuId) {
+      const index = state.list.findIndex(goods => goods.skuId === skuId)
+      state.list.splice(index, 1)
     }
   },
   actions: {
@@ -97,6 +103,18 @@ export default {
           })
         })
       }
+    },
+    // 从登录和未登录两种情况封装删除购物车商品
+    deleteCart ({ rootState, commit }, skuId) {
+      return new Promise((resolve, reject) => {
+        if (rootState.user.profile.token) {
+          // 已登录
+        } else {
+          // 未登录
+          commit('deleteCart', skuId)
+          resolve()
+        }
+      })
     }
   }
 }

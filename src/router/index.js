@@ -7,6 +7,7 @@ const Home = () => import('@/views/home')
 const TopCategory = () => import('@/views/category')
 const SubCategory = () => import('@/views/category/sub')
 const Goods = () => import('@/views/goods')
+const Cart = () => import('@/views/cart')
 const routes = [
   {
     path: '/',
@@ -43,6 +44,11 @@ const routes = [
     path: '/login/callback',
     name: 'LoginCallback',
     component: LoginCallback
+  },
+  {
+    path: '/cart',
+    name: 'Cart',
+    component: Cart
   }
 ]
 // vue2.0 new VueRouter({}) 创建路由实例

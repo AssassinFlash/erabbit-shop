@@ -2,16 +2,19 @@
   <!-- 购物车组件 -->
   <div class="cart">
     <!-- 购物车图标 -->
-    <a href="javascript:;" class="curr">
+    <router-link to="/cart" class="curr">
       <i class="iconfont icon-cart"></i>
       <em>{{ goodsTotal }}</em>
-    </a>
+    </router-link>
     <!-- 购物车弹层 -->
-    <div class="layer">
+    <div class="layer" v-if="goodsList.length && $route.path!=='/cart'">
       <div class="list">
-        <div class="item" v-for="goods in goodsList" :key="goods.skuId">
+        <div
+          class="item" v-for="goods in goodsList"
+          :key="goods.skuId"
+        >
           <router-link :to="{ name: 'Product', params: { id: goods.id, skuId: goods.skuId } }">
-            <img v-lazy="goods.picture" alt="" />
+            <img v-lazy="goods.picture" alt=""/>
             <div class="center">
               <p class="name ellipsis-2">
                 {{ goods.name }}
@@ -23,7 +26,7 @@
               <p class="count">{{ goods.count }}</p>
             </div>
           </router-link>
-          <i class="iconfont icon-close-new"></i>
+          <i class="iconfont icon-close-new" @click="deleteCart(goods)"></i>
         </div>
       </div>
       <div class="foot">
@@ -31,7 +34,7 @@
           <p>共{{ goodsTotal }}件商品</p>
           <p>&yen;{{ goodsAmount }}</p>
         </div>
-        <xtx-button type="plain">去购物车结算</xtx-button>
+        <xtx-button type="plain" @click="$router.push('/cart')">去购物车结算</xtx-button>
       </div>
     </div>
   </div>
@@ -40,6 +43,7 @@
 <script>
 import { computed } from 'vue'
 import { useStore } from 'vuex'
+
 export default {
   name: 'AppHeaderCart',
   // 购物车数据
@@ -47,7 +51,13 @@ export default {
     const store = useStore()
     // 商品列表
     const goodsList = computed(() => {
-      return store.getters['cart/validList']
+      return store.getters['cart/validList'].map(goods => {
+        return {
+          // 标志位，控制删除icon的显示
+          showIcon: false,
+          ...goods
+        }
+      })
     })
     // 商品总件数
     const goodsTotal = computed(() => {
@@ -61,10 +71,16 @@ export default {
     // 初始化组件时更新购物车列表信息
     store.dispatch('cart/findCartList')
 
+    // 删除购物车商品
+    const deleteCart = (goods) => {
+      store.dispatch('cart/deleteCart', goods.skuId)
+    }
+
     return {
       goodsList,
       goodsTotal,
-      goodsAmount
+      goodsAmount,
+      deleteCart
     }
   }
 }
@@ -160,6 +176,7 @@ export default {
       .item {
         padding: 10px 0;
         border-bottom: 1px solid #f5f5f5;
+        position: relative;
 
         a {
           display: flex;
