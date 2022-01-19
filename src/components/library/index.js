@@ -13,6 +13,7 @@
 // // 面包屑item
 // import XtxBreadItem from './xtx-bread-item'
 import Message from './Message'
+import Confirm from './Confirm'
 // 批量注册组件：
 // 1.使用 require 提供的函数 context 加载目录下所有的 .vue 后缀的文件
 //   require.context(目录，是否加载子目录，文件匹配)
@@ -40,6 +41,7 @@ export default {
     defineDirective(app)
     // 挂载到vue实例原型
     app.config.globalProperties.$message = Message
+    app.config.globalProperties.$confirm = Confirm
   }
 }
 

@@ -29,9 +29,10 @@ export default {
     const checked = useVModel(props, 'modelValue', emit)
     const changeChecked = () => {
       // 通知父组件
-      checked.value = !checked.value
+      const newVal = !checked.value
+      checked.value = newVal
       // 再派发一个 change 事件
-      emit('change', checked.value)
+      emit('change', newVal)
     }
 
     return {

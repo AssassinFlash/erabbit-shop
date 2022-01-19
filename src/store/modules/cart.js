@@ -27,6 +27,30 @@ export default {
       return getters.validList.reduce((prevVal, currVal) => {
         return prevVal + Number((currVal.nowPrice * currVal.count).toString().match(/^\d+(?:\.\d{0,2})?/))
       }, 0)
+    },
+    // 无效商品列表
+    invalidList (state) {
+      return state.list.filter(goods => goods.stock <= 0 || !goods.isEffective)
+    },
+    // 选中商品列表
+    selectedList (state, getters) {
+      return getters.validList.filter(goods => goods.selected)
+    },
+    // 选中商品件数
+    selectedTotal (state, getters) {
+      return getters.selectedList.reduce((prevVal, currVal) => {
+        return prevVal + currVal.count
+      }, 0)
+    },
+    // 选中商品总金额
+    selectedAmount (state, getters) {
+      return getters.selectedList.reduce((prevVal, currVal) => {
+        return prevVal + Number((currVal.nowPrice * currVal.count).toString().match(/^\d+(?:\.\d{0,2})?/))
+      }, 0)
+    },
+    // 是否全选
+    isCheckAll (state, getters) {
+      return getters.selectedList !== 0 && getters.validList.length === getters.selectedList.length
     }
   },
   mutations: {
@@ -112,6 +136,34 @@ export default {
         } else {
           // 未登录
           commit('deleteCart', skuId)
+          resolve()
+        }
+      })
+    },
+    // 修改购物车商品
+    updateCart ({ rootState, commit }, goods) {
+      // goods中：必须有skuId，其他想修改的属性 selected count
+      return new Promise((resolve, reject) => {
+        if (rootState.user.profile.token) {
+          // 已登录
+        } else {
+          // 未登录
+          commit('updateCart', goods)
+          resolve()
+        }
+      })
+    },
+    // 全选与取消全选
+    checkAllCart (context, selected) {
+      return new Promise((resolve, reject) => {
+        if (context.rootState.user.profile.token) {
+          // 已登录
+        } else {
+          // 未登录
+          // 获取有效商品列表，遍历调用修改mutations
+          context.getters.validList.forEach(goods => {
+            context.commit('updateCart', { skuId: goods.skuId, selected })
+          })
           resolve()
         }
       })
