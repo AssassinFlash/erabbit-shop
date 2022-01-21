@@ -153,7 +153,7 @@ import {
   userMobileLoginMsg
 } from '@/api/user'
 import { useStore } from 'vuex'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { ref, reactive, watch, getCurrentInstance } from 'vue'
 
 export default {
@@ -198,6 +198,7 @@ export default {
     const formCom = ref(null)
     const store = useStore()
     const router = useRouter()
+    const route = useRoute()
     // const route = useRoute()
     // 获取vue应用实例
     const app = getCurrentInstance()
@@ -231,7 +232,8 @@ export default {
             token,
             mobile
           })
-          await router.push(store.state.user.redirectUrl)
+          await store.dispatch('cart/mergeCart')
+          await router.push(route.query.redirectUrl)
           app.proxy.$message({
             type: 'success',
             text: '登录成功'

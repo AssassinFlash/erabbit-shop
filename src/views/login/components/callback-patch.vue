@@ -195,6 +195,7 @@ export default {
             mobile,
             token
           })
+          await store.dispatch('cart/mergeCart')
           await router.push(store.state.user.redirectUrl)
         } catch (e) {
           proxy.$message({

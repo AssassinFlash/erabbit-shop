@@ -1,5 +1,13 @@
 // 购物车模块
-import { getNewCartGoods } from '@/api/cart'
+import {
+  getNewCartGoods,
+  mergeCart,
+  findCartList,
+  insertCart,
+  deleteCart,
+  updateCart,
+  checkAllCart
+} from '@/api/cart'
 
 export default {
   namespaced: true,
@@ -87,6 +95,11 @@ export default {
     deleteCart (state, skuId) {
       const index = state.list.findIndex(goods => goods.skuId === skuId)
       state.list.splice(index, 1)
+    },
+    // 设置购物车
+    setCart (state, list) {
+      // 可以置空也可以设值
+      state.list = list
     }
   },
   actions: {
@@ -98,7 +111,11 @@ export default {
       // 所以要拿到user的state，就通过rootState来拿到
       return new Promise((resolve, reject) => {
         if (context.rootState.user.profile.token) {
-          // 已登录
+          // 已登录，加入购物车之后要执行更新购物车的操作
+          insertCart(payload).then(() => findCartList()).then(({ result }) => {
+            context.commit('setCart', result)
+            resolve()
+          })
         } else {
           // 未登录，存储到本地
           context.commit('insertCart', payload)
@@ -108,31 +125,37 @@ export default {
     },
     // 更新购物车中商品信息时就会调用修改购物车的方法
     findCartList ({ rootState, state, commit }) {
-      // 已登录
-      if (rootState.user.profile.token) {
-
-      } else {
-        // 未登录
-        // 同时发送请求（有几个商品就发几个请求）等所有请求成功，一并修改本地数据
-        // Promise.all(promise数组).then(dataList=>{})，得到的结果数组与promise数组一一对应
-        const promiseArr = state.list.map(goods => {
-          // 返回接口函数的调用，该函数生成一个promise
-          return getNewCartGoods(goods.skuId)
-        })
-        Promise.all(promiseArr).then(dataList => {
-          dataList.forEach((data, i) => {
-            // console.log(data.result)
-            // 返回的result本身没有skuId，而修改购物车商品需要skuId
-            commit('updateCart', { skuId: state.list[i].skuId, ...data.result })
+      return new Promise((resolve, reject) => {
+        if (rootState.user.profile.token) {
+          findCartList().then(({ result }) => {
+            commit('setCart', result)
           })
-        })
-      }
+          resolve()
+        } else {
+          // 同时发送请求，一并去修改本地数据，结果与请求位置一一对应
+          // Promise.all(promise数组).then(datalist=>{})
+          const promiseArr = state.list.map(goods => {
+            return getNewCartGoods(goods.skuId)
+          })
+          Promise.all(promiseArr).then(dataList => {
+            // 更新购物车
+            dataList.forEach((data, i) => {
+              commit('updateCart', { skuId: state.list[i].skuId, ...data.result })
+            })
+          })
+          resolve()
+        }
+      })
     },
     // 从登录和未登录两种情况封装删除购物车商品
     deleteCart ({ rootState, commit }, skuId) {
       return new Promise((resolve, reject) => {
         if (rootState.user.profile.token) {
-          // 已登录
+          // 已登录，删除购物车商品后要执行更新购物车操作
+          deleteCart([skuId]).then(() => findCartList()).then(({ result }) => {
+            commit('setCart', result)
+            resolve()
+          })
         } else {
           // 未登录
           commit('deleteCart', skuId)
@@ -140,12 +163,16 @@ export default {
         }
       })
     },
-    // 修改购物车商品
+    // 修改购物车商品数量和选中状态
     updateCart ({ rootState, commit }, goods) {
       // goods中：必须有skuId，其他想修改的属性 selected count
       return new Promise((resolve, reject) => {
         if (rootState.user.profile.token) {
           // 已登录
+          updateCart(goods).then(() => findCartList()).then(({ result }) => {
+            commit('setCart', result)
+            resolve()
+          })
         } else {
           // 未登录
           commit('updateCart', goods)
@@ -158,6 +185,11 @@ export default {
       return new Promise((resolve, reject) => {
         if (context.rootState.user.profile.token) {
           // 已登录
+          const ids = context.getters.validList.map(goods => goods.skuId)
+          checkAllCart({ selected, ids }).then(() => findCartList()).then(({ result }) => {
+            context.commit('setCart', result)
+          })
+          resolve()
         } else {
           // 未登录
           // 获取有效商品列表，遍历调用修改mutations
@@ -167,6 +199,68 @@ export default {
           resolve()
         }
       })
+    },
+    // 批量删除购物车
+    batchDeleteCart (context) {
+      return new Promise((resolve, reject) => {
+        if (context.rootState.user.profile.token) {
+          // 已登录
+          // 得到需要删除的商品列表的skuID数组
+          const ids = context.getters.selectedList.map(goods => goods.skuId)
+          deleteCart(ids).then(() => findCartList()).then(({ result }) => {
+            context.commit('setCart', result)
+            resolve()
+          })
+        } else {
+          // 未登录
+          // 遍历选中的商品，执行单个删除的mutations
+          context.getters.selectedList.forEach(goods => {
+            context.commit('deleteCart', goods.skuId)
+          })
+          resolve()
+        }
+      })
+    },
+    // 修改商品规格
+    updateCartSku (context, { oldSkuId, newSku }) {
+      return new Promise((resolve, reject) => {
+        if (context.rootState.user.profile.token) {
+          // 已登录
+          const oldGoods = context.state.list.find(goods => goods.skuId === oldSkuId)
+          deleteCart([oldSkuId]).then(() => {
+            return insertCart({ skuId: newSku.skuId, count: oldGoods.count })
+          }).then(() => findCartList()).then(({ result }) => {
+            context.commit('setCart', result)
+            resolve()
+          })
+        } else {
+          // 未登录
+          // 1. 找到旧的商品规格
+          // 2. 修改sku的时候由于skuId需要更改
+          // 相当于在购物车商品中找到这个商品，然后删除这个商品，再添加一条新的商品信息
+          const oldGoods = context.state.list.find(goods => goods.skuId === oldSkuId)
+          context.commit('deleteCart', oldSkuId)
+          // 解构的另外命名的方式 -》 原本的名称：更改后的名称
+          const { skuId, price: nowPrice, inventory: stock, specsText: attrsText } = newSku
+          const newGoods = { ...oldGoods, skuId, nowPrice, stock, attrsText }
+          context.commit('insertCart', newGoods)
+          resolve()
+        }
+      })
+    },
+    // 合并购物车
+    async mergeCart ({ state, commit }) {
+      const cartList = state.list.map(goods => {
+        return {
+          skuId: goods.skuId,
+          selected: goods.selected,
+          count: goods.count
+        }
+      })
+      // 调用接口
+      await mergeCart(cartList)
+      // 合并成功，清空本地存储的购物车数组
+      commit('setCart', [])
     }
   }
 }

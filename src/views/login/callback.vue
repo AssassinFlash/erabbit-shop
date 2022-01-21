@@ -82,6 +82,7 @@ export default {
           store.commit('user/setUser', {
             id, avatar, nickname, account, mobile, token
           })
+          await store.dispatch('cart/mergeCart')
           await router.push(store.state.user.redirectUrl)
           proxy.$message({ type: 'success', text: '登录成功' })
         } catch (e) {
