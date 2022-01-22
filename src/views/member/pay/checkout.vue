@@ -10,7 +10,7 @@
         <!-- 收货地址 -->
         <h3 class="box-title">收货地址</h3>
         <div class="box-body">
-          <checkout-address :list="orderInfo.userAddresses" />
+          <checkout-address :list="orderInfo.userAddresses" @change="changeAddress"/>
         </div>
         <!-- 商品信息 -->
         <h3 class="box-title">商品信息</h3>
@@ -96,7 +96,7 @@
 <script>
 import CheckoutAddress from './components/checkout-address'
 import { createOrder } from '@/api/order'
-import { ref } from 'vue'
+import { ref, reactive } from 'vue'
 export default {
   components: { CheckoutAddress },
   name: 'XtxPayCheckoutPage',
@@ -106,8 +106,17 @@ export default {
       orderInfo.value = result
     })
 
+    // 提交订单的时候需要收货地址ID
+    const requestParams = reactive({
+      addressId: null
+    })
+    const changeAddress = (id) => {
+      requestParams.addressId = id
+    }
+
     return {
-      orderInfo
+      orderInfo,
+      changeAddress
     }
   }
 }
