@@ -17,11 +17,11 @@
           >{{ showAddress.fullLocation + showAddress.address }}
         </li>
       </ul>
-      <a href="javascript:;" v-if="showAddress">修改地址</a>
+      <a @click="openAddressEdit(showAddress)" href="javascript:;" v-if="showAddress">修改地址</a>
     </div>
     <div class="action">
       <xtx-button class="btn" @click="openDialog">切换地址</xtx-button>
-      <xtx-button class="btn">添加地址</xtx-button>
+      <xtx-button class="btn" @click="openAddressEdit({})">添加地址</xtx-button>
     </div>
   </div>
   <!-- 对话框组件 -->
@@ -58,12 +58,16 @@
       <xtx-button type="primary" @click="confirmAddress">确认</xtx-button>
     </template>
   </xtx-dialog>
+  <!-- 添加收货地址组件 -->
+  <address-edit @on-success="successHandler" ref="addressEdit"></address-edit>
 </template>
 
 <script>
 import { ref } from 'vue'
+import AddressEdit from './address.edit.vue'
 
 export default {
+  components: { AddressEdit },
   name: 'CheckoutAddress',
   props: {
     list: {
@@ -116,13 +120,42 @@ export default {
       emit('change', showAddress.value && showAddress.value.id)
     }
 
+    // 添加收货地址组件和修改收货地址
+    const addressEdit = ref(null)
+    const openAddressEdit = (address) => {
+      // 直接调用组件实例的方法，添加->{}，修改->{address}
+      addressEdit.value.open(address)
+    }
+
+    // 监听添加收货地址组件派发的成功添加事件
+    const successHandler = (formData) => {
+      // 如果是添加：往list追加一条地址
+      // 要注意的是，修改formData的时候，数组中的数据也会更新，因为是同一引用地址
+      // 而当打开对话框的时候就需要清空之前的输入信息，这时候已经是修改了formData
+      // 因此需要克隆formData数据
+      // 根据formData中的id去当前地址列表中查找，有就是修改，无就是添加
+      const address = props.list.find(item => item.id === formData.id)
+      if (address) {
+        for (const key in address) {
+          address[key] = formData[key]
+        }
+      } else {
+        const jsonStr = JSON.stringify(formData)
+        // eslint-disable-next-line vue/no-mutating-props
+        props.list.unshift(JSON.parse(jsonStr))
+      }
+    }
+
     return {
       showAddress,
       handlePhone,
       dialogVisible,
       selectedAddress,
       openDialog,
-      confirmAddress
+      confirmAddress,
+      addressEdit,
+      openAddressEdit,
+      successHandler
     }
   }
 }

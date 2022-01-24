@@ -1,6 +1,7 @@
 // 提供复用逻辑函数（钩子）
-import { ref } from 'vue'
-import { useIntersectionObserver } from '@vueuse/core'
+import { ref, onUnmounted } from 'vue'
+import dayjs from 'dayjs'
+import { useIntersectionObserver, useIntervalFn } from '@vueuse/core'
 /*
 * 数据懒加载函数：当组件进入可视区域时再加载数据
 * @param { Function } apiFn - 监听的 DOM 对象区域对应的数据获取函数
@@ -29,5 +30,30 @@ export const useLazyData = (apiFn) => {
   return {
     target,
     result
+  }
+}
+
+export const usePayTime = () => {
+  const time = ref(0)
+  const timeText = ref('')
+  const { pause, resume } = useIntervalFn(() => {
+    time.value--
+    timeText.value = dayjs.unix(time.value).format('mm分ss秒')
+    if (time.value <= 0) {
+      pause()
+    }
+  }, 1000, false)
+  onUnmounted(() => {
+    pause()
+  })
+  const start = (countdown) => {
+    time.value = countdown
+    timeText.value = dayjs.unix(time.value).format('mm分ss秒')
+    resume()
+  }
+
+  return {
+    start,
+    timeText
   }
 }

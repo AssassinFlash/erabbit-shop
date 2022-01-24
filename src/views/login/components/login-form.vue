@@ -233,7 +233,7 @@ export default {
             mobile
           })
           await store.dispatch('cart/mergeCart')
-          await router.push(route.query.redirectUrl)
+          await router.push(route.query.redirectUrl || '/')
           app.proxy.$message({
             type: 'success',
             text: '登录成功'
@@ -241,7 +241,7 @@ export default {
         } catch (e) {
           Message({
             type: 'error',
-            text: e.response.data.message || '登录失败'
+            text: '登录失败'
           })
         }
       }

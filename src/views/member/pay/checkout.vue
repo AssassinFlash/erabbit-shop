@@ -10,7 +10,10 @@
         <!-- 收货地址 -->
         <h3 class="box-title">收货地址</h3>
         <div class="box-body">
-          <checkout-address :list="orderInfo.userAddresses" @change="changeAddress"/>
+          <checkout-address
+            :list="orderInfo.userAddresses"
+            @change="changeAddress"
+          />
         </div>
         <!-- 商品信息 -->
         <h3 class="box-title">商品信息</h3>
@@ -86,7 +89,7 @@
         </div>
         <!-- 提交订单 -->
         <div class="submit">
-          <xtx-button type="primary">提交订单</xtx-button>
+          <xtx-button type="primary" @click="submitOrderFn">提交订单</xtx-button>
         </div>
       </div>
     </div>
@@ -95,7 +98,9 @@
 
 <script>
 import CheckoutAddress from './components/checkout-address'
-import { createOrder } from '@/api/order'
+import { createOrder, submitOrder } from '@/api/order'
+import Message from '@/components/library/Message'
+import { useRouter } from 'vue-router'
 import { ref, reactive } from 'vue'
 export default {
   components: { CheckoutAddress },
@@ -104,19 +109,47 @@ export default {
     const orderInfo = ref(null)
     createOrder().then(({ result }) => {
       orderInfo.value = result
+      requestParams.goods = result.goods.map(goods => {
+        return {
+          skuId: goods.skuId,
+          count: goods.count
+        }
+      })
     })
 
-    // 提交订单的时候需要收货地址ID
+    // 提交订单的时候需要收货地址ID，其中商品信息需要在获取订单信息后设置
     const requestParams = reactive({
-      addressId: null
+      addressId: null,
+      goods: [],
+      deliveryTimeType: 1,
+      payType: 1,
+      payChannel: 1,
+      buyerMessage: ''
     })
+    // 监听地址组件派发的change事件，获取地址ID
     const changeAddress = (id) => {
       requestParams.addressId = id
     }
 
+    // 提交订单
+    const router = useRouter()
+    const submitOrderFn = () => {
+      if (!requestParams.addressId) {
+        return Message({ text: '请选择收货地址' })
+      } else {
+        submitOrder(requestParams).then(({ result }) => {
+          Message({ type: 'success', text: '提交订单成功' })
+          // 跳转支付页面
+          router.push({ name: 'PayIndex', query: { orderId: result.id } })
+        })
+      }
+    }
+
     return {
       orderInfo,
-      changeAddress
+      changeAddress,
+      requestParams,
+      submitOrderFn
     }
   }
 }

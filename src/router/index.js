@@ -10,6 +10,7 @@ const SubCategory = () => import('@/views/category/sub')
 const Goods = () => import('@/views/goods')
 const Cart = () => import('@/views/cart')
 const PayCheckout = () => import('@/views/member/pay/checkout')
+const PayIndex = () => import('@/views/member/pay')
 const routes = [
   {
     path: '/',
@@ -56,6 +57,11 @@ const routes = [
     path: '/member/checkout',
     name: 'Checkout',
     component: PayCheckout
+  },
+  {
+    path: '/member/pay',
+    name: 'PayIndex',
+    component: PayIndex
   }
 ]
 // vue2.0 new VueRouter({}) 创建路由实例
