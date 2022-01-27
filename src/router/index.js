@@ -1,4 +1,5 @@
-import { createRouter, createWebHashHistory } from 'vue-router'
+import { createRouter, createWebHashHistory, RouterView } from 'vue-router'
+import { h } from 'vue'
 import store from '@/store'
 
 const Login = () => import('@/views/login')
@@ -11,6 +12,10 @@ const Goods = () => import('@/views/goods')
 const Cart = () => import('@/views/cart')
 const PayCheckout = () => import('@/views/member/pay/checkout')
 const PayIndex = () => import('@/views/member/pay')
+const MemberLayout = () => import('@/views/member/Layout')
+const MemberHome = () => import('@/views/member/home')
+const MemberOrder = () => import('@/views/member/order')
+const MemberOrderDetail = () => import('@/views/member/order/detail')
 const routes = [
   {
     path: '/',
@@ -35,6 +40,32 @@ const routes = [
         path: '/product/:id',
         name: 'Product',
         component: Goods
+      },
+      {
+        path: '/member',
+        component: MemberLayout,
+        children: [
+          {
+            path: '/member',
+            component: MemberHome
+          },
+          {
+            path: '/member/order',
+            // 使用路由的模糊匹配激活需要改造路由，使用 h 函数创建router-view组件
+            // 这个router-view是当前路由下的子路由的出口
+            component: { render: () => h(<RouterView />) },
+            children: [
+              {
+                path: '',
+                component: MemberOrder
+              },
+              {
+                path: ':id',
+                component: MemberOrderDetail
+              }
+            ]
+          }
+        ]
       }
     ]
   },

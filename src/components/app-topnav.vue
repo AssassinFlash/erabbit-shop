@@ -4,10 +4,10 @@
       <ul>
         <template v-if="profile.token">
           <li>
-            <a href="javascript:;">
+            <router-link to="/member">
               <i class="iconfont icon-user"/>
               {{ profile.nickname }}
-            </a>
+            </router-link>
           </li>
           <li>
             <a @click="logout" href="javascript:;">
@@ -31,9 +31,7 @@
           </a>
         </li>
         <li>
-          <a href="javascript:;">
-            会员中心
-          </a>
+          <router-link to="/member">个人中心</router-link>
         </li>
         <li>
           <a href="javascript:;">
